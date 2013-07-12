@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+<link href="/static/css/main.css" rel="stylesheet">
+<style>
+body {
+	padding-top: 60px;
+	/* 60px to make the container go all the way to the bottom of the topbar */
+}
+</style>
+<!-- <link href="/static/css/bootstrap-responsive.css" rel="stylesheet"> -->
+
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>golang websocket chatroom</title>
+<script src="/config.js"></script>
+<script src="/static/js/jquery.js"></script>
+<script src="/static/js/xhr_poll.js"></script>
+<script src="/static/js/chat.js"></script>
+</head>
+<body>
+
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container-fluid">
+				<a class="brand" href="/">Go Chatting</a>
+				<div class="nav-collapse">
+					<!--             <ul class="nav">
+		  <li class="active"><a href="/">Lobby</a></li>
+		</ul> -->
+					<ul class="nav pull-right">
+
+					</ul>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="container">
+			<div class="row">
+				<div id="left-column" class="span3">
+					<div class="well c-sidebar-nav">
+
+						<ul class="nav nav-list">
+							<li class="nav-header">Chats</li>
+							<li class="active"><a href="javascript:void(0)">In Room</a>
+							</li>
+						</ul>
+					</div>
+				</div>		
+
+				<div id="chat-column" class="span8">
+					<div id="chat-messages">
+						<div class="message-container">
+							<strong>Welcome</strong>
+						</div>
+					</div>
+
+				</div>
+				<div id="input-box" class="span8">
+					<form id="msgform" class="form-horizontal post-form">
+						<div class="input-append">
+							<select id="userlist" style="float: left; width: 90px;">
+								<option value=0>所有人</option>
+							</select> <input type="text" id="msg" size="16" class="span7"
+								style="float: left; width: 450px;" /> <input type="submit"
+								value="发送" class="btn">
+						</div>
+					</form>
+
+				</div>
+
+				<div id="right-column" class="span2">
+					<div class="well c-sidebar-nav">
+						<ul id="user-list" class="nav nav-list">
+							<li class="nav-header">Who is here?</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- /container -->
+		<div id="msg-template" style="display: none">
+			<div class="message-container">
+				<div class="userpic"></div>
+				<div class="message">
+					<span class="user"></span> <span class="content"></span>
+				</div>
+				<div class="msg-time"></div>
+			</div>
+		</div>
+		<!-- / -->
+	</div>
+</body>
+</html>
