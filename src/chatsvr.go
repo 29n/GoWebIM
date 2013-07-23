@@ -1,46 +1,36 @@
 package main
 
 import (
+	"./etc"
 	"./lib/go.net/websocket"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	//"reflect"
-	"runtime"
 	"strconv"
 	. "strings"
 	"sync"
-	"net"
 	"encoding/json"
 )
 
 type Client struct {
 	conn *websocket.Conn
 }
-
-type Config struct {
-	host string
-	port string
-	max_conn int
-}
-
-var svr_cnf Config = Config{port: "80", max_conn: 1000}
-
 var cur_id int = 0
 var mutex sync.Mutex
 var err error
 
-interface ChatUser{
+type ChatUser interface {
 	Write(string)
 }
 
-func (Client *) Write(content string) {
+func (c *Client) Write (content string) {
 
 }
 
-var clients map[int]Client = make(map[int]Client, svr_cnf.max_conn)
-var userlist map[string]string =  make(map[string]string, svr_cnf.max_conn)
+var clients map[int]Client = make(map[int]Client, etc.MaxClient)
+var userlist map[string]string =  make(map[string]string, etc.MaxClient)
 
 func broadcast(content string, client_id int) {
 	for id, client := range(clients) {
@@ -192,26 +182,20 @@ func CharRoom(ws *websocket.Conn) {
 }
 
 func main() {
-	ifs, _ := net.InterfaceAddrs() 
-	svr_cnf.host = ifs[0].String()
-	
-	http.Handle("/xhr_poll/", )
+	//http.Handle("/xhr_poll/", )
 	http.Handle("/chatroom", websocket.Handler(CharRoom))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.Handle("/", http.RedirectHandler("/static/html/index.html", 301))
 	http.HandleFunc("/config.js", func(w http.ResponseWriter, r *http.Request){
 		var conf map[string]string = make(map[string]string, 2)
-		conf["host"] = svr_cnf.host
-		conf["port"] = svr_cnf.port
+		conf["host"] = etc.ServerHost
+		conf["port"] = etc.ServerPort
 		jsonStr, err := json.Marshal(conf); if err!=nil {
 			fmt.Printf("json.Marshal fail.error=%s\n", err)
 		}
 		io.WriteString(w, fmt.Sprintf("var config = %s;\n", jsonStr))
 	})
-
-	runtime.GOMAXPROCS(4)
-
-	var svr_ = svr_cnf.host + ":" + svr_cnf.port
+	var svr_ = etc.ServerHost + ":" + etc.ServerPort
 
 	log.Printf("Server start on %s", svr_)
 	if err := http.ListenAndServe(svr_, nil); err != nil {
