@@ -89,6 +89,15 @@ $(document).ready(function(){
 	}
 });
 
+function xssFilter(val) {
+    val = val.toString();
+    val = val.replace(/[<%3C]/g, "&lt;");
+    val = val.replace(/[>%3E]/g, "&gt;");
+    val = val.replace(/"/g, "&quot;");
+    val = val.replace(/'/g, "&#39;");
+    return val;
+}
+
 function GetDateT() {
 	var d, s;
 	s = '';
@@ -138,6 +147,7 @@ function newUser(userid) {
 }
 
 function newMsg(fromId, content, color) {
+	content = xssFilter(content)
 	$("#msg-template .msg-time").html(GetDateT());
 	if(fromId == 0){
 		$("#msg-template .userpic").html("");
