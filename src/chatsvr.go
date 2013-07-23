@@ -90,6 +90,7 @@ Loop:
 		default:
 			goto unknow
 		}
+		continue;
 	unknow:
 		if err := websocket.Message.Send(ws, "cmd unknow"); err != nil {
 			log.Printf("Can't send.%s", err)

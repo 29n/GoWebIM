@@ -4,22 +4,33 @@
 </head>
 <body>
 <style>
+* {
+    font-size: 14px;
+}
 input {
     height: 36px;
     margin: 5px;
 }
 .login {
-    width: 500px;
-	height: 300px;
+    width: 420px;
 	background-color: #eee;
 	margin: 100px auto;
 	border: 1px #ebf;
 }
+.login form {
+    margin: 12px;
+}
+h2 {
+    line-height: 200%;
+    margin-left: 20px; 
+    font-size: 24px;
+}
 </style>
     <div class='login'>
+    <h2>Go Web IM</h2>
 	<form action="./chatroom.html" method="get" >
-		<input type="text" name="name" value="请输入一个昵称" onfocus="this.value=''"></br>
-		<input type="text" name="avatar" value="请输入头像图片URL" onfocus="this.value=''"></br>
+		<input type="text" name="name" value="请输入一个昵称" onfocus="this.value=''">(您的昵称)</br>
+		<input type="text" name="avatar" value="请输入头像图片URL" onfocus="this.value=''">(微博小头像URL，50x50)</br>
 		<input type="submit" value="Login">
 	</form>
 	</div>
