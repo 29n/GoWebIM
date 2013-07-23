@@ -2,7 +2,7 @@ package qq
 
 import (
 	"../lib/go.net/websocket"
-	"html"
+//	"html"
 //	"fmt"
 )
 
@@ -21,7 +21,7 @@ type Client struct {
 }
 
 func (c *Client) Write (content string) {
-	websocket.Message.Send(c.Conn, html.EscapeString(content))
+	websocket.Message.Send(c.Conn, content)
 }
 
 func (c *Client) SetName(name, avatar string) {
