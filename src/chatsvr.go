@@ -38,7 +38,7 @@ Loop:
 			break
 		}
 		if etc.Debug {
-			log.Printf("%s: %s", client.Addr, reply)
+			log.Printf("[#%d] %s", client.Id, reply)
 		}
 		if EqualFold("", TrimSpace(reply)) {
 			fmt.Println("empty")

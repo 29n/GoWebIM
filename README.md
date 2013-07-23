@@ -12,3 +12,5 @@ go get code.google.com/p/go.net/websocket
 go run src/chatsvr.go
 ```
 
+在线体验地址：
+http://112.124.39.26:8080/
