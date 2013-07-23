@@ -5,3 +5,5 @@ GoWebIM
 
 > go run src/chatsvr.go
 
+体验地址：http://112.124.39.26:8080/
+
