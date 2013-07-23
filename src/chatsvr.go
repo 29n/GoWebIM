@@ -3,6 +3,7 @@ package main
 import (
 	"./etc"
 	"./lib/go.net/websocket"
+	"./qq"
 	"fmt"
 	"io"
 	"log"
@@ -10,193 +11,108 @@ import (
 	//"reflect"
 	"strconv"
 	. "strings"
-	"sync"
-	"encoding/json"
 )
 
-type Client struct {
-	conn *websocket.Conn
-}
-var cur_id int = 0
-var mutex sync.Mutex
-var err error
-
-type ChatUser interface {
-	Write(string)
-}
-
-func (c *Client) Write (content string) {
-
-}
-
-var clients map[int]Client = make(map[int]Client, etc.MaxClient)
-var userlist map[string]string =  make(map[string]string, etc.MaxClient)
-
-func broadcast(content string, client_id int) {
-	for id, client := range(clients) {
-		if id == client_id {
-			continue
-		} else {
-			websocket.Message.Send(client.conn, content)
-		}
-	}
-}
-
-func cmd_set_name(client_id int, name string) {
-	var ws *websocket.Conn = clients[client_id].conn
-	mutex.Lock()
-	userlist[strconv.Itoa(client_id)] = name
-	mutex.Unlock()
-	go broadcast(fmt.Sprintf("login %d %s", client_id, name), client_id)
-	websocket.Message.Send(ws, fmt.Sprintf("setok %d", client_id))
-}
-
-func cmd_unknow(client_id int) {
-	var ws *websocket.Conn = clients[client_id].conn
-	if err = websocket.Message.Send(ws, "cmd unknow"); err != nil {
-		log.Printf("Can't send.%s", err)
-		panic(100)
-	}
-}
-
-func cmd_proxy() {
-
-}
-
-func cmd_get_name(client_id int) {	
-	var jsonStr []byte
-	
-	jsonStr, err := json.Marshal(userlist)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	var ws *websocket.Conn = clients[client_id].conn
-	websocket.Message.Send(ws, fmt.Sprintf("names %s", jsonStr))
-}
-
-func cmd_sendto(client_id int, to_id int, content string) {
-	var ws *websocket.Conn = clients[to_id].conn
-	websocket.Message.Send(ws, fmt.Sprintf("msgto %d %s", client_id, content))
-}
-
-func cmd_sendall(client_id int, group_id int, content string) {
-	var send string = fmt.Sprintf("msgall %d %s", client_id, content);
-	go broadcast(send, client_id);
-}
-
-func comet_loop() {
-
-}
-
-func CharRoom(ws *websocket.Conn) {
+func MainLoop(ws *websocket.Conn) {
 	var cmd []string = make([]string, 3)
-	var addr = ws.LocalAddr().String()
-	var client_id int
 	var to_id int
 
-	mutex.Lock()
-	cur_id++
-	client_id = cur_id
-	clients[client_id] = Client{conn: ws}
-	mutex.Unlock()
+	client := G.AddClient(ws)
 
-	defer func() {
-		if x := recover(); x != nil {
-			log.Printf("run time panic: %v", x)
-		}
-	}()
+	if client == nil {
+		log.Printf("Too many connection. Addr=%s", client.Addr)
+		return
+	}
 
-	log.Printf("New connection. Addr=%s", addr)
+	//	defer func() {
+	//		if x := recover(); x != nil {
+	//			log.Printf("run time panic: %v", x)
+	//		}
+	//	}()
 
-	Loop:
+Loop:
 	for {
 		var reply string
-		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			log.Printf("Can't send.%s", err)
+		if err := websocket.Message.Receive(ws, &reply); err != nil {
+			log.Printf("Receive Error: %s", err)
 			break
 		}
-
+		log.Printf("%s: %s", client.Addr, reply)
 		if EqualFold("", TrimSpace(reply)) {
 			fmt.Println("empty")
 			break
 		}
-
 		cmd = SplitN(reply, " ", 3)
-
 		//至少有2个参数
 		if len(cmd) < 3 {
-			cmd_unknow(client_id)
+			goto unknow
 		}
-
-		log.Printf("%s: %s-%s: %s", addr, cmd[0], cmd[1], cmd[2])
 		switch cmd[0] {
 		case "set":
 			switch cmd[1] {
 			//修改名称
 			case "name":
-				cmd_set_name(client_id, cmd[2])
+				info := SplitN(cmd[2], "|", 2)
+				client.SetName(info[0], info[1])
 				continue
 				break
 			default:
-				cmd_unknow(client_id)
-				break
+				goto unknow
 			}
 			break
 		case "get":
 			switch cmd[1] {
 			case "name":
-				cmd_get_name(client_id)
+				client.Write("names " + G.GetClients())
 				break
 			default:
-				cmd_unknow(client_id)
-				break
+				goto unknow
 			}
 			break
-		
+
 		//向某个人发送信息
 		case "sendto":
 			to_id, _ = strconv.Atoi(cmd[1])
-			cmd_sendto(client_id, to_id, cmd[2])
+			G.Sendto(client.Id, to_id, cmd[2])
 			break
 
 		//向某个组或所有人发送信息
 		case "sendm":
 			to_id, _ = strconv.Atoi(cmd[1])
-			cmd_sendall(client_id, to_id, cmd[2])
+			G.Broadcast(fmt.Sprintf("msgall %d %s", client.Id, cmd[2]), client.Id)
 			break
 		case "logout":
-			websocket.Message.Send(ws, fmt.Sprintf("goodbye %d", client_id))
-			break Loop;	
-		
+			G.RemoveClient(client.Id)
+			break Loop
+
 		default:
-			cmd_unknow(client_id)
-			break
+			goto unknow
+		}
+	unknow:
+		if err := websocket.Message.Send(ws, "cmd unknow"); err != nil {
+			log.Printf("Can't send.%s", err)
+			panic(100)
 		}
 	}
-	
-	mutex.Lock()
-	delete(clients, client_id)
-	delete(userlist, strconv.Itoa(client_id))
-	broadcast("logout "+strconv.Itoa(client_id), client_id)
-	mutex.Unlock()
+	G.RemoveClient(client.Id)
 }
+
+var G *qq.Group
 
 func main() {
 	//http.Handle("/xhr_poll/", )
-	http.Handle("/chatroom", websocket.Handler(CharRoom))
+	G = qq.NewGroup(etc.MaxClient)
+	http.Handle("/chatroom", websocket.Handler(MainLoop))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	http.Handle("/", http.RedirectHandler("/static/html/index.html", 301))
-	http.HandleFunc("/config.js", func(w http.ResponseWriter, r *http.Request){
-		var conf map[string]string = make(map[string]string, 2)
-		conf["host"] = etc.ServerHost
-		conf["port"] = etc.ServerPort
-		jsonStr, err := json.Marshal(conf); if err!=nil {
-			fmt.Printf("json.Marshal fail.error=%s\n", err)
+	http.HandleFunc("/config.js", func(w http.ResponseWriter, r *http.Request) {
+		var js_debug string = "false"
+		if etc.Debug {
+			js_debug = "true"
 		}
-		io.WriteString(w, fmt.Sprintf("var config = %s;\n", jsonStr))
+		io.WriteString(w, fmt.Sprintf("var config = {host:'%s', port: %s, debug: %s};\n", etc.ServerHost, etc.ServerPort, js_debug))
 	})
 	var svr_ = etc.ServerHost + ":" + etc.ServerPort
-
 	log.Printf("Server start on %s", svr_)
 	if err := http.ListenAndServe(svr_, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
