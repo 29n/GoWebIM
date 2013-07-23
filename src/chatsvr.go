@@ -37,7 +37,9 @@ Loop:
 			log.Printf("Receive Error: %s", err)
 			break
 		}
-		log.Printf("%s: %s", client.Addr, reply)
+		if etc.Debug {
+			log.Printf("%s: %s", client.Addr, reply)
+		}
 		if EqualFold("", TrimSpace(reply)) {
 			fmt.Println("empty")
 			break

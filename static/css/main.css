@@ -62,14 +62,11 @@ div.message-container{
 	position:relative;
 	line-height: 20px;
 	padding: 6px 10px;
-	border-bottom: 1px solid #DDD;
-	height: 50px;
 }
 
 div#chat-messages {
 	overflow-y: scroll;
 	height: 800px;
-	bottom: 45px;
 }
 
 div.msg-time{
@@ -87,8 +84,6 @@ div.message{
 #chat-column .userpic{
 	float:left;
 	margin-right:5px;
-	height: 50px;
-    width: 50px;
 }
 
 li.user-online {
@@ -106,4 +101,19 @@ li.user-online img {
 
 .chat-room{
 	margin-bottom: 20px;
+}
+#left-userlist {
+	margin-left: 10px;
+}
+
+#left-userlist li {
+	float: left;
+    height: 60px;
+    list-style: none outside none;
+    margin-top: 10px;
+    width: 60px;
+    margin-left: 0px;
+}
+#left-userlist li img{
+   border-radius: 5px;
 }

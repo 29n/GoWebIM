@@ -39,7 +39,6 @@ $(document).ready(function(){
 				userlist = eval("(" + resp[1] + ")");
 				for (var i in userlist)
 				{
-					if(i == parseInt(client_id, 10)) continue
 					newUser(userlist[i].Id);
 				}
 			} 
@@ -51,7 +50,7 @@ $(document).ready(function(){
 			else if (resp[0] == "msgall") 
 			{
 				_userid = resp[1]
-				newMsg(_userid, "对所有人说: " + resp[2]);
+				newMsg(_userid, "说: " + resp[2]);
 			} 
 			else if (resp[0] == "login") 
 			{
@@ -91,14 +90,15 @@ $(document).ready(function(){
 });
 
 function GetDateT() {
-	var d,s;
+	var d, s;
+	s = '';
 	d = new Date();
-	s = d.getYear() + "-";             // 取年份
-	s = s + (d.getMonth() + 1) + "-";// 取月份
-	s += d.getDate() + " ";         // 取日期
+	//s = d.getYear() + "-";             // 取年份
+	//s = s + (d.getMonth() + 1) + "-";// 取月份
+	//s += d.getDate() + " ";         // 取日期
 	s += d.getHours() + ":";       // 取小时
-	s += d.getMinutes() + ":";    // 取分
-	s += d.getSeconds();         // 取秒
+	s += d.getMinutes();           // 取分
+	//s += d.getSeconds();         // 取秒
 	return(s);  
 }
 
@@ -121,13 +121,20 @@ function selectUser(userid) {
 
 function delUser(userid) {
 	$('#user_' + userid).remove();
+	$('#inroom_' + userid).remove();
 	delete (userlist[userid])
 }
 
 function newUser(userid) {
-	$('#userlist').append(
-			"<option value='" + userid + "' id='user_" + userid + "'>" + userlist[userid].Name
-					+ "</option>");
+	if(userid != client_id) {
+		$('#userlist').append(
+				"<option value='" + userid + "' id='user_" + userid + "'>" + userlist[userid].Name
+						+ "</option>");
+	}
+	$('#left-userlist').append(
+			"<li id='inroom_"+userid+"'><a href='javascript:selectUser("+userid+")'>" +
+					"<img src='" + userlist[userid].Avatar + "' width='50' height='50'></a></li>"
+	);
 }
 
 function newMsg(fromId, content, color) {
@@ -137,9 +144,16 @@ function newMsg(fromId, content, color) {
 		$("#msg-template .content").html("<span style='color: green'>【系统】</span>" + content);
 	}
 	else {
-		$("#msg-template .userpic").html("<img src='" + userlist[fromId].Avatar + "' width='50' height='50'>")
-		var html = '<span style="color: orange"><a href="javascript:selectUser('+fromId+')">' + userlist[fromId].Name;
-		html += '</a></span> ' + content + '</span>';
+		var html = '';
+		//$("#msg-template .userpic").html("<img src='" + userlist[fromId].Avatar + "' width='50' height='50'>")
+		if(client_id == fromId){
+			html += '<span style="color: orange">我说: </span>: ';
+			
+		} else {
+			html += '<span style="color: orange"><a href="javascript:selectUser('+fromId+')">' + userlist[fromId].Name;
+			html += '</a></span> '
+		}
+		html += content + '</span>';
 		$("#msg-template .content").html(html);
 	}
 	$("#chat-messages").append($("#msg-template").html());
@@ -155,7 +169,7 @@ $(function() {
 		} else {
 			ws.send("sendto " + $('#userlist').val() + " " + content);
 		}
-		newMsg(client_id, "我：" + content);
+		newMsg(client_id, content);
 		$('#msg').val('');
 		return false;
 	});

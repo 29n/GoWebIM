@@ -46,12 +46,14 @@ body {
 			<div class="row">
 				<div id="left-column" class="span3">
 					<div class="well c-sidebar-nav">
-
 						<ul class="nav nav-list">
 							<li class="nav-header">Chats</li>
 							<li class="active"><a href="javascript:void(0)">In Room</a>
 							</li>
 						</ul>
+					   <ul id="left-userlist">
+					   </ul>
+					   <div style="clear: both"></div>
 					</div>
 				</div>		
 
@@ -75,23 +77,23 @@ body {
 					</form>
 
 				</div>
-
-				<div id="right-column" class="span2">
-					<div class="well c-sidebar-nav">
-						<ul id="user-list" class="nav nav-list">
-							<li class="nav-header">Who is here?</li>
-						</ul>
-					</div>
-				</div>
 			</div>
-
 		</div>
 		<!-- /container -->
 		<div id="msg-template" style="display: none">
 			<div class="message-container">
 				<div class="userpic"></div>
 				<div class="message">
-					<span class="user"></span> <span class="content"></span>
+					<span class="user"></span>
+					<div class="cloud cloudText">
+						<div style="" class="cloudPannel">
+							<div class="sendStatus"></div>
+							<div class="cloudBody">
+								<div class="content" ></div>
+							</div>
+							<div class="cloudArrow "></div>
+						</div>
+					</div>
 				</div>
 				<div class="msg-time"></div>
 			</div>
