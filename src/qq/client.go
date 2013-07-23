@@ -1,26 +1,27 @@
 package qq
 
 import (
-	"../lib/go.net/websocket"
+	"code.google.com/p/go.net/websocket"
+
 //	"html"
 //	"fmt"
 )
 
 type UserInfo struct {
-	Id int
-	Name string
+	Id     int
+	Name   string
 	Avatar string
 }
 
 type Client struct {
-	Id int
-	Addr string
-	Info UserInfo
-	Conn *websocket.Conn
+	Id       int
+	Addr     string
+	Info     UserInfo
+	Conn     *websocket.Conn
 	CurGroup *Group
 }
 
-func (c *Client) Write (content string) {
+func (c *Client) Write(content string) {
 	websocket.Message.Send(c.Conn, content)
 }
 

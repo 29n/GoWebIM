@@ -1,19 +1,19 @@
 package qq
 
 import (
-	"../lib/go.net/websocket"
+	"code.google.com/p/go.net/websocket"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"log"
 	"strconv"
+	"sync"
 )
 
 type Group struct {
 	sync.Mutex
-	Clients map[int]*Client
-	MaxClients  int
-	CurrentId   int
+	Clients    map[int]*Client
+	MaxClients int
+	CurrentId  int
 }
 
 func NewGroup(max int) *Group {
@@ -64,7 +64,7 @@ func (g *Group) RemoveClient(clientId int) bool {
 
 func (g *Group) Sendto(formId, toId int, content string) {
 	c := g.Clients[toId]
-	if c== nil {
+	if c == nil {
 		log.Println("User[#%d] is bad.", toId)
 		return
 	}

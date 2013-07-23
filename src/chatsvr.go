@@ -2,8 +2,8 @@ package main
 
 import (
 	"./etc"
-	"./lib/go.net/websocket"
 	"./qq"
+	"code.google.com/p/go.net/websocket"
 	"fmt"
 	"io"
 	"log"
@@ -90,7 +90,7 @@ Loop:
 		default:
 			goto unknow
 		}
-		continue;
+		continue
 	unknow:
 		if err := websocket.Message.Send(ws, "cmd unknow"); err != nil {
 			log.Printf("Can't send.%s", err)
