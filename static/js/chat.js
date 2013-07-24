@@ -81,11 +81,7 @@ $(document)
 				});
 
 function xssFilter(val) {
-	val = val.toString();
-	val = val.replace(/[<%3C]/g, "&lt;");
-	val = val.replace(/[>%3E]/g, "&gt;");
-	val = val.replace(/"/g, "&quot;");
-	val = val.replace(/'/g, "&#39;");
+	val = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\x22/g, '&quot;').replace(/\x27/g, '&#39;');
 	return val;
 }
 
